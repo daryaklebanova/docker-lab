@@ -1,13 +1,11 @@
 name: Build and Test Spring Boot
 
-# События, на которые запускается workflow
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
 
-# Форсируем Node.js 24, чтобы не было ошибки exit code 127
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -15,7 +13,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # PostgreSQL как сервис
     services:
       postgres:
         image: postgres:15
@@ -32,27 +29,24 @@ jobs:
           --health-retries 5
 
     steps:
-    
       - uses: actions/checkout@v3
-      
+
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 21
 
-      # Сборка Spring Boot JAR
       - name: Build Spring Boot JAR
         run: ./gradlew clean bootJar
 
-      # Проверка наличия JAR
       - name: Check JAR
         run: ls build/libs/
 
-      # Тест доступности API без Docker Compose
-      - name: Test application
+      - name: Run Spring Boot App for Test
         run: |
-          echo "Тестируем API /items через Java процесс"
+          # Запускаем JAR в фоне
           java -jar build/libs/demo-0.0.1-SNAPSHOT.jar &
           sleep 20
+          # Тестируем API
           curl -f http://localhost:8080/items || exit 1
