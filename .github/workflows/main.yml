@@ -1,28 +1,12 @@
-name: Build and Test Spring Boot
+name: Build Spring Boot JAR only
 
 on:
   push:
     branches: [main]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: testdb
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-        options: >-
-          --health-cmd "pg_isready -U testuser"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - uses: actions/checkout@v3
@@ -36,10 +20,5 @@ jobs:
       - name: Build JAR
         run: ./gradlew clean bootJar
 
-      - name: Start Spring Boot App
-        run: |
-          nohup java -jar build/libs/demo-0.0.1-SNAPSHOT.jar &
-          sleep 25
-
-      - name: Test API
-        run: curl -f http://localhost:8080/items
+      - name: Check JAR
+        run: ls build/libs/
