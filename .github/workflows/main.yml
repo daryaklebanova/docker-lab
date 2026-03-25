@@ -45,8 +45,6 @@ jobs:
 
       - name: Run Spring Boot App for Test
         run: |
-          # Запускаем JAR в фоне
           java -jar build/libs/demo-0.0.1-SNAPSHOT.jar &
           sleep 20
-          # Тестируем API
           curl -f http://localhost:8080/items || exit 1
