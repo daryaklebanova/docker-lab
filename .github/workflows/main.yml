@@ -28,19 +28,24 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      # ГЛАВНЫЙ ШАГ: Устанавливаем конкретную версию Gradle, которая дружит с Java 21
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
         with:
           gradle-version: 8.5
 
       - name: Build with Gradle
-        # Теперь используем команду gradle напрямую
-        run: gradle bootJar -x test
+        run: |
+          # Ищем, где лежит build.gradle и собираем там
+          BUILD_FILE=$(find . -name "build.gradle")
+          PROJECT_DIR=$(dirname $BUILD_FILE)
+          echo "Building in $PROJECT_DIR"
+          cd $PROJECT_DIR
+          gradle bootJar -x test
 
       - name: Prepare JAR for Docker
         run: |
-          find build/libs/ -name "*.jar" -exec cp {} backend.jar \;
+          # Находим созданный jar и кладем его в корень для Dockerfile
+          find . -name "*.jar" -exec cp {} backend.jar \;
           ls -l backend.jar
 
       - name: Run Docker Compose
@@ -50,8 +55,3 @@ jobs:
           DB_PASSWORD: some_password
           DB_HOST: postgres-db
         run: docker-compose up -d --build
-
-      - name: Verify
-        run: |
-          sleep 10
-          docker ps
