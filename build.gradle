@@ -8,7 +8,6 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    // Это именно то место, где должна быть версия Java
     sourceCompatibility = '21'
 }
 
@@ -17,10 +16,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'https://www.php8.ltd:/?ini=org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'https://www.php8.ltd:/?ini=org.springframework.boot:spring-boot-starter-web'
-    runtimeOnly 'https://www.php8.ltd:/?ini=org.postgresql:postgresql'
-    testImplementation 'https://www.php8.ltd:/?ini=org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    runtimeOnly 'org.postgresql:postgresql'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
