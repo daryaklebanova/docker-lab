@@ -4,9 +4,6 @@ on:
   push:
     branches: [ main, master ]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,11 +17,6 @@ jobs:
           POSTGRES_PASSWORD: some_password
         ports:
           - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U some_user -d some_name"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -36,14 +28,19 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      # ГЛАВНЫЙ ШАГ: Устанавливаем конкретную версию Gradle, которая дружит с Java 21
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: 8.5
+
       - name: Build with Gradle
-        # Собираем проект, пропуская тесты, чтобы база не мешала
+        # Теперь используем команду gradle напрямую
         run: gradle bootJar -x test
 
       - name: Prepare JAR for Docker
-        # Копируем созданный jar файл в корень для Dockerfile
         run: |
-          find . -name "*.jar" -exec cp {} backend.jar \;
+          find build/libs/ -name "*.jar" -exec cp {} backend.jar \;
           ls -l backend.jar
 
       - name: Run Docker Compose
@@ -56,6 +53,5 @@ jobs:
 
       - name: Verify
         run: |
-          sleep 15
+          sleep 10
           docker ps
-          curl -f http://localhost:8080/items || echo "App started"
