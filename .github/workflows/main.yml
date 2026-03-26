@@ -3,10 +3,7 @@ name: Build and Test Docker Lab
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
 
-# Убираем предупреждение про Node.js 20, принудительно включая 24 версию
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -33,7 +30,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Устанавливаем Java 21 (как в твоем проекте)
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -45,7 +41,8 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Spring Boot JAR
-        run: ./gradlew bootJar
+        # Добавили --stacktrace, чтобы в логах было видно точную причину ошибки
+        run: ./gradlew bootJar --stacktrace
 
       - name: Prepare JAR for Docker
         run: cp build/libs/*.jar backend.jar
