@@ -5,14 +5,12 @@ on:
     branches: [ main, master ]
 
 env:
-  # Убираем предупреждение про Node.js
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    # Запускаем базу данных для тестов (если они понадобятся)
     services:
       postgres-db:
         image: postgres:15
@@ -38,7 +36,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      # Установка Gradle 8.5 (решает ошибку со скриншота)
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -46,7 +43,6 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          # Ищем build.gradle и собираем проект
           BUILD_FILE=$(find . -name "build.gradle")
           PROJECT_DIR=$(dirname $BUILD_FILE)
           cd $PROJECT_DIR
@@ -54,14 +50,8 @@ jobs:
 
       - name: Prepare JAR for Docker
         run: |
-          # Копируем созданный файл в корень как backend.jar для Dockerfile
           find . -name "*.jar" -not -name "*plain.jar" -exec cp {} backend.jar \;
-          if [ -f backend.jar ]; then 
-            echo "✅ JAR файл успешно найден и скопирован!"
-            ls -l backend.jar
-          else 
-            echo "❌ ОШИБКА: JAR файл не найден!" && exit 1
-          fi
+          ls -l backend.jar
 
       - name: Run Docker Compose
         env:
@@ -69,10 +59,11 @@ jobs:
           DB_USER: some_user
           DB_PASSWORD: some_password
           DB_HOST: postgres-db
-        run: docker-compose up -d --build
+        # Исправлено: docker compose (без дефиса)
+        run: docker compose up -d --build
 
       - name: Verify Application
         run: |
-          sleep 15
+          sleep 20
           docker ps
-          echo "Сборка завершена успешно!"
+          echo "🚀 Поздравляю! Лабораторная работа успешно собрана и запущена!"
