@@ -22,9 +22,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-// ЭТОТ БЛОК РЕШИТ ОШИБКУ СО СКРИНШОТА
 bootJar {
-    enabled = true
+    mainClass = 'com.example.demo.DemoApplication' 
 }
 
 jar {
