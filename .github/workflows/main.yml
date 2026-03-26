@@ -6,12 +6,15 @@ on:
   pull_request:
     branches: [ main, master ]
 
+# Убираем предупреждение про Node.js 20, принудительно включая 24 версию
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     services:
-      # Запускаем временную базу данных для тестов внутри GitHub
       postgres-db:
         image: postgres:15
         env:
@@ -30,11 +33,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      # Устанавливаем Java 21 (как в твоем проекте)
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
           cache: 'gradle'
 
       - name: Make gradlew executable
