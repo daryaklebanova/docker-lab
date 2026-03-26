@@ -35,14 +35,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'gradle'
 
-      - name: Make gradlew executable
-        run: chmod +x gradlew
-
-      - name: Build Spring Boot JAR
-        # Добавили --stacktrace, чтобы в логах было видно точную причину ошибки
-        run: ./gradlew bootJar --stacktrace
+      # Мы убрали chmod и ./gradlew. Теперь используем встроенный gradle
+      - name: Build with Gradle
+        run: gradle bootJar -x test
 
       - name: Prepare JAR for Docker
         run: cp build/libs/*.jar backend.jar
@@ -58,5 +54,4 @@ jobs:
       - name: Verify Application
         run: |
           sleep 30
-          docker ps
           curl -v http://localhost:8080/items || echo "App is starting..."
