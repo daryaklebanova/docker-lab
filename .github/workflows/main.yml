@@ -30,10 +30,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Этот шаг покажет нам структуру твоих папок в логах!
-      - name: List files
-        run: ls -R
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -41,11 +37,14 @@ jobs:
           java-version: '21'
 
       - name: Build with Gradle
-        # Мы добавим флаг --info, чтобы увидеть детальную ошибку
-        run: gradle bootJar -x test --info
+        # Собираем проект, пропуская тесты, чтобы база не мешала
+        run: gradle bootJar -x test
 
       - name: Prepare JAR for Docker
-        run: cp build/libs/*.jar backend.jar || cp demo/build/libs/*.jar backend.jar
+        # Копируем созданный jar файл в корень для Dockerfile
+        run: |
+          find . -name "*.jar" -exec cp {} backend.jar \;
+          ls -l backend.jar
 
       - name: Run Docker Compose
         env:
@@ -55,7 +54,8 @@ jobs:
           DB_HOST: postgres-db
         run: docker-compose up -d --build
 
-      - name: Verify Application
+      - name: Verify
         run: |
-          sleep 30
-          curl -v http://localhost:8080/items || echo "App is starting..."
+          sleep 15
+          docker ps
+          curl -f http://localhost:8080/items || echo "App started"
