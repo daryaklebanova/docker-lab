@@ -29,29 +29,23 @@ jobs:
           java-version: '21'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v3 # Обновили на самую свежую версию
         with:
           gradle-version: 8.5
 
       - name: Build with Gradle
         run: |
-          # Ищем, где лежит build.gradle и собираем там
+          # Ищем build.gradle и собираем
           BUILD_FILE=$(find . -name "build.gradle")
           PROJECT_DIR=$(dirname $BUILD_FILE)
-          echo "Building in $PROJECT_DIR"
           cd $PROJECT_DIR
-          gradle bootJar -x test
+          gradle build -x test
 
       - name: Prepare JAR for Docker
         run: |
-          # Находим созданный jar и кладем его в корень для Dockerfile
-          find . -name "*.jar" -exec cp {} backend.jar \;
+          # Ищем любой созданный jar файл и переименовываем
+          find . -name "*.jar" -not -name "*plain.jar" -exec cp {} backend.jar \;
           ls -l backend.jar
 
       - name: Run Docker Compose
-        env:
-          DB_NAME: some_name
-          DB_USER: some_user
-          DB_PASSWORD: some_password
-          DB_HOST: postgres-db
         run: docker-compose up -d --build
